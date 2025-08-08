@@ -33,7 +33,7 @@
 
 ```
 
-![image](1.pdf)
+![image](1.png)
 
 
 ```
