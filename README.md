@@ -1,4 +1,4 @@
-# PHbinder and PSGM: A Cascaded Framework for Epitope Prediction and HLA-I Allele Identification
+# PHbinder & PSGM: Peptide-HLA Interaction Framework
 
 这是一个用于肽段-HLA结合预测 (PHbinder) 和 HLA 伪序列生成 (PSGM) 的级联框架。PHbinder 模型旨在预测肽段与其结合的 MHC 分子（HLA）之间的结合亲和力，而 PSGM 模型则能根据给定的肽段生成候选的 HLA 伪序列。
 
@@ -6,7 +6,7 @@
 
 - [PHbinder & PSGM: Peptide-HLA Interaction Framework](#phbinder--psgm-peptide-hla-interaction-framework)
   - [目录](#目录)
-  - [Overview](#Overview)
+  - [Overview](#overview)
   - [项目结构](#项目结构)
   - [开始复现](#开始复现)
     - [1. 克隆仓库](#1-克隆仓库)
@@ -30,14 +30,36 @@
 ---
 
 ## Overview
+
 本项目提供了一个端到端的框架，用于处理肽段-HLA结合预测问题。该框架包含两个核心组件：
+
 1.  **PSGM (Pseudo-Sequence Generation Model):** 一个用于根据给定的肽段生成其潜在结合的HLA伪序列的模型。这有助于拓展和丰富HLA结合的上下文信息。
 2.  **PHbinder (Peptide-HLA Binding predictor):** 一个利用LoRA微调的ESM-2模型作为特征提取器，并结合交叉注意力机制和分类器，预测肽段-HLA结合亲和力的模型。
 
 这两个模型可以独立使用，也可以通过级联的方式实现更全面的分析流程。以下是PHbinder和PSGM模型及其级联工作流的简要示意图：
-![image](1.png)
 
----
+```
+
++----------------+       +-------------------+       +-----------------+
+\| Input Peptide  |------>| PSGM Model        |------>| Generated HLA   |
++----------------+       | (HLA Generator)   |       | Pseudo-sequence |
++-------------------+       +-----------------+
+|
+\| (Optional, for combined input)
+v
++----------------+       +-------------------+       +-----------------+
+\| Input Peptide  |------>| PHbinder Model    |------>| Binding         |
++----------------+       | (Binding Predictor)|       | Affinity/Label  |
++-----------------+ ---->+-------------------+       +-----------------+
+\| Input HLA       |
+\| Pseudo-sequence |
++-----------------+
+
+```
+
+![Model Architecture Diagram](1.png)
+*（请将 `1.png` 替换为你的实际模型架构图片路径，例如 `docs/model_architecture.png`）*
+
 ---
 
 ## 项目结构
@@ -58,11 +80,11 @@ YourProjectName/
 │   │   ├── HLA\_I\_epitope\_validation.csv     # PHbinder 验证集
 │   │   ├── HLA\_I\_epitope\_test.csv           # PHbinder 测试集
 │   │   ├── hebing.CSV                       # PSGM 训练数据
-│   │   └── 伪序列数据.CSV                   # HLA伪序列数据库
+│   │   └── 伪序列数据.CSV                   # HLA伪序列数据库 (用于PSGM的Mapper)
 │   └── processed/                      # 预处理或中间生成的数据 (由脚本生成)
 │       ├── train.csv                   # PSGM 划分后的训练集
 │       ├── val.csv                     # PSGM 划分后的验证集
-│       └── test.csv                    # PSGM 划分后的测试集
+│       └── test.csv                    # PSGM 划分后的测试集 (用于PSGM训练后的内部评估)
 ├── models/                             # 存放预训练模型权重、LoRA权重、最终模型检查点
 │   ├── esm2\_t30\_150M\_UR50D/            # ESM模型本体 (用户需自行下载并放入此处)
 │   ├── phbinder\_lora\_weights/          # PHbinder LoRA微调的权重 (由训练脚本生成)
@@ -93,10 +115,11 @@ YourProjectName/
 │   └── run\_cascading\_framework.py      # 级联框架的入口脚本，整合两个模型的工作流
 ├── notebooks/                          # 可选：Jupyter Notebooks，用于实验、数据探索或教程
 │   └── demo\_cascading\_framework.ipynb
-└── docs/                               # 可选：更详细的文档、设计思路、API说明等
-└── architecture.md
+├── docs/                               # 可选：更详细的文档、设计思路、API说明等
+│   └── architecture.md
+└── results/                            # 存放预测结果或生成文件
 
-```
+````
 
 ## 开始复现
 
@@ -132,7 +155,25 @@ cd YourProjectName
 
 2. **安装依赖：**
    在项目根目录下确保存在 `requirements.txt` 文件，其中列出了所有必要的 Python 库及其版本号。
+
+   **`requirements.txt` 示例内容:**
+
+   ```
+   torch>=1.10.0,<2.3.0
+   transformers>=4.10.0
+   pandas>=1.3.0
+   numpy>=1.21.0
+   scikit-learn>=1.0.0
+   biopython>=1.79
+   tqdm>=4.62.0
+   einops>=0.3.0
+   esm # 特定版本可能需要根据你的ESM模型和库兼容性来确定，例如 esm==0.4.0
+   ```
+
+   **注意：** 这里的版本号是示例，请根据你实际开发时使用的版本进行调整，确保兼容性。特别是 `torch` 和 `esm`，它们的版本匹配非常重要。
+
    然后安装：
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -145,6 +186,7 @@ PHbinder 和 PSGM 模型都依赖于 ESM-2 预训练模型。由于 ESM-2 模型
    访问 ESM 官方 GitHub 页面或 Hugging Face 页面，下载 `esm2_t30_150M_UR50D` 模型权重。通常你会得到一个包含模型文件和 tokenizer 配置的文件夹。
 
    * **Hugging Face:** 可以从 `facebook/esm2_t30_150M_UR50D` 下载，例如通过 `transformers.AutoTokenizer.from_pretrained` 或 `esm.pretrained.esm2_t30_150M_UR50D()` 第一次运行时会自动下载。为了离线运行和避免重复下载，建议手动下载。
+   * 如果你希望手动下载，ESM 模型的 `transformers` 兼容版本通常包含以下文件：`config.json`, `pytorch_model.bin`, `tokenizer.json`, `vocab.json` 等。
 
 2. **放置模型文件:**
    将下载好的 `esm2_t30_150M_UR50D` 文件夹完整地放置到 `models/` 目录下，使其路径为：
@@ -188,7 +230,10 @@ class Config:
     TRAIN_DATA_PATH = "data/raw/hebing.CSV"            # PSGM训练数据路径
     HLA_DB_PATH = "data/raw/伪序列数据.CSV"             # HLA伪序列数据库路径
     MODEL_SAVE_PATH = "models/psgm_checkpoints/hla_generator.pth" # PSGM模型保存路径
-    # ... 其他超参数如学习率、批大小、Epochs等
+    PROCESSED_TRAIN_DATA_PATH = "data/processed/train.csv" # PSGM处理后的训练集保存路径
+    PROCESSED_VAL_DATA_PATH = "data/processed/val.csv"   # PSGM处理后的验证集保存路径
+    PROCESSED_TEST_DATA_PATH = "data/processed/test.csv" # PSGM处理后的测试集保存路径
+    # ... 其他超参数如学习率、批大小、Epochs、PATIENCE 等
 ```
 
 **`config/phbinder_config.py` 关键配置项：**
@@ -216,42 +261,67 @@ class Config:
 
 #### 训练 PSGM 模型
 
-这将训练 `HLAGenerator` 和 `Discriminator`，并将 `HLAGenerator` 的最佳权重保存到 `models/psgm_checkpoints/hla_generator.pth`。同时，它会根据 `config/psgm_config.py` 中的配置，将原始训练数据划分为训练、验证、测试集并保存到 `data/processed/`。
+此脚本会从 `config/psgm_config.py` 中指定的原始训练数据 (`Config.TRAIN_DATA_PATH`) 中读取数据，并将其自动划分为训练集、验证集和测试集（默认 8:1:1），然后保存到 `data/processed/` 目录下。随后，它会训练 PSGM 模型（包含 HLAGenerator 和 Discriminator），并将最佳的 `HLAGenerator` 模型权重保存到 `models/psgm_checkpoints/hla_generator.pth`。训练完成后，脚本还会使用划分出的测试集进行一次内部评估。
+
+**先决条件：**
+
+* `data/raw/hebing.CSV` 文件存在。
+* `config/psgm_config.py` 中的 `TRAIN_DATA_PATH` 和 `MODEL_SAVE_PATH` 配置正确。
+
+**运行命令：**
 
 ```bash
 python scripts/train_psgm.py
 ```
 
+**预期输出：**
+
+* 控制台将显示数据加载、划分信息，以及每个 Epoch 的训练和验证损失。
+* 数据集的划分结果 (`train.csv`, `val.csv`, `test.csv`) 将保存到 `data/processed/` 目录。
+* 最佳的 PSGM 生成器模型权重 (`hla_generator.pth`) 将保存到 `models/psgm_checkpoints/` 目录。
+* 训练完成后，控制台将输出使用内部测试集进行的评估结果。
+
 #### 生成 HLA 伪序列
 
-使用训练好的 PSGM 模型，根据给定的肽段列表生成 HLA 伪序列。
+使用训练好的 PSGM 模型，根据给定的肽段列表生成 HLA 伪序列。这允许你为新的肽段生成对应的 HLA 上下文。
 
-1. **准备输入文件：**
-   创建一个 CSV 文件 (例如 `input_peptides.csv`)，其中包含一个名为 `Peptide` 的列，列出你要生成 HLA 伪序列的肽段。
+**先决条件：**
 
-   ```csv
-   # input_peptides.csv
-   Peptide
-   AAGIGILTV
-   NLVPMVATV
-   ...
-   ```
-2. **运行生成脚本：**
+* 已成功训练并保存 `hla_generator.pth` 模型。
+* `data/raw/伪序列数据.CSV` 文件存在（用于 HLA 伪序列到实际 HLA 名称的映射）。
+* 准备一个包含待预测肽段的 CSV 文件。
 
-   ```bash
-   python scripts/generate_hla.py \
-       --input_peptides_file input_peptides.csv \
-       --output_results_file results/generated_hla_results.csv \
-       --model_path models/psgm_checkpoints/hla_generator.pth \
-       --hla_db_path data/raw/伪序列数据.CSV \
-       --device "cuda" # 或 "cpu"
-   ```
+**1. 准备输入文件：**
+创建一个 CSV 文件 (例如 `input_peptides.csv`)，其中包含一个名为 `Peptide` 的列，列出你要生成 HLA 伪序列的肽段。
 
-   * `--input_peptides_file`: **必需**，包含肽段的 CSV 文件路径。
-   * `--output_results_file`: **必需**，生成结果的输出路径和文件名。
-   * `--model_path`: **必需**，训练好的 PSGM 模型检查点路径。
-   * `--hla_db_path`: **必需**，HLA 伪序列数据库路径。
-   * `--device`: 指定运行设备。
+```csv
+# input_peptides.csv
+Peptide
+AAGIGILTV
+NLVPMVATV
+...
+```
+
+**2. 运行生成脚本：**
+
+```bash
+python scripts/generate_hla.py \
+    --input_peptides_file input_peptides.csv \
+    --output_results_file results/generated_hla_results.csv \
+    --model_path models/psgm_checkpoints/hla_generator.pth \
+    --hla_db_path data/raw/伪序列数据.CSV \
+    --device "cuda" # 或 "cpu"
+```
+
+* `--input_peptides_file`: **必需**，包含肽段的 CSV 文件路径。
+* `--output_results_file`: **必需**，生成结果的输出路径和文件名。
+* `--model_path`: **必需**，训练好的 PSGM 模型检查点路径。
+* `--hla_db_path`: **必需**，HLA 伪序列数据库路径。
+* `--device`: 指定运行设备。
+
+**预期输出：**
+
+* 一个名为 `generated_hla_results.csv` 的文件将生成在 `results/` 目录下，包含输入肽段和生成的 HLA 伪序列。
 
 ### 2. PHbinder 模型使用场景
 
@@ -322,7 +392,7 @@ python scripts/train_psgm.py
 2. **确认模型路径:**
    确保你已经下载或训练好了 PHbinder 主模型检查点 (例如 `models/phbinder_checkpoints/best_model_I.pt`) 和其对应的 LoRA 权重 (例如 `models/phbinder_lora_weights/best_lora_I.pt`)。这些路径应该与 `config/phbinder_config.py` 中的默认值一致，或者你可以在命令行中指定。
 
-3. **运行预测脚本:**
+3. **运行预测脚本：**
    在项目根目录下，执行以下命令：
 
    ```bash
@@ -340,7 +410,7 @@ python scripts/train_psgm.py
    * `--lora_weights_path`: **可选**，PHbinder LoRA 微调的权重路径 (初始化 `This_work` 模型所需)。默认值为 `config.SAVE_PATH_LORA_WEIGHTS`。
    * `--device`: 指定运行设备。
 
-4. **预期输出:**
+4. **预期输出：**
 
    * 一个名为 `my_predictions.csv` 的文件将生成在 `results/` 目录下，包含输入肽段、预测的标签 (`Predicted_Label`) 和结合概率 (`Binding_Probability`)。
    * 如果输入文件中包含 `Label` 列，控制台还将输出模型在该数据集上的评估指标。
@@ -374,9 +444,45 @@ python scripts/train_psgm.py
 
    **注意：** 你需要根据 `run_cascading_framework.py` 的具体实现和参数定义来调整上述命令。它需要同时加载 PSGM 和 PHbinder 模型。
 
+## 清理 (可选)
+
+如果你需要清理生成的数据和模型检查点，可以运行以下命令：
+
+```bash
+rm -rf data/processed/*
+rm -rf models/phbinder_checkpoints/*
+rm -rf models/psgm_checkpoints/*
+rm -rf models/phbinder_lora_weights/*
+rm -rf results/*
+```
+
+## 常见问题与故障排除
+
+* **GPU 内存不足 (CUDA out of memory):**
+
+  * 尝试减小 `config` 文件中 `BATCH_SIZE` 相关参数的值。
+  * 将 `--device` 参数设置为 `cpu`，但这会显著增加运行时间。
+  * 关闭其他占用 GPU 资源的应用程序。
+* **ESM 模型加载错误 (FileNotFoundError 或其他):**
+
+  * 确保你已按照 [下载预训练模型权重 (ESM-2)](#3-下载预训练模型权重-esm-2) 部分的说明，将 ESM 模型文件正确放置在 `models/esm2_t30_150M_UR50D/` 目录下。
+  * 检查 `config/phbinder_config.py` 和 `config/psgm_config.py` 中的 `LOCAL_ESM_MODEL_PATH` 是否正确。
+* **Python 包版本冲突:**
+
+  * 确保你的 `requirements.txt` 文件内容准确无误。
+  * 尝试删除并重新创建 Conda 虚拟环境，然后重新安装依赖。
+* **数据文件格式错误:**
+
+  * 确保你的 CSV 文件严格遵循预期格式（例如，`Epitope` 和 `Label` 列名是否正确，分隔符是否是逗号 `,`）。
+  * 检查文件编码是否正确（通常是 UTF-8）。
+
 ## 许可证
 
 本项目采用 [MIT License](LICENSE) 许可。
 
+## 致谢
 
+感谢所有为本项目提供灵感、数据和支持的资源和个人。
 
+```
+```
