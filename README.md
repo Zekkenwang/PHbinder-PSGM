@@ -38,27 +38,7 @@
 
 这两个模型可以独立使用，也可以通过级联的方式实现更全面的分析流程。以下是PHbinder和PSGM模型及其级联工作流的简要示意图：
 
-```
-
-+----------------+       +-------------------+       +-----------------+
-\| Input Peptide  |------>| PSGM Model        |------>| Generated HLA   |
-+----------------+       | (HLA Generator)   |       | Pseudo-sequence |
-+-------------------+       +-----------------+
-|
-\| (Optional, for combined input)
-v
-+----------------+       +-------------------+       +-----------------+
-\| Input Peptide  |------>| PHbinder Model    |------>| Binding         |
-+----------------+       | (Binding Predictor)|       | Affinity/Label  |
-+-----------------+ ---->+-------------------+       +-----------------+
-\| Input HLA       |
-\| Pseudo-sequence |
-+-----------------+
-
-```
-
 ![Model Architecture Diagram](1.png)
-*（请将 `1.png` 替换为你的实际模型架构图片路径，例如 `docs/model_architecture.png`）*
 
 ---
 
