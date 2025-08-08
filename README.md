@@ -1,5 +1,3 @@
-好的，我已经为您修改了 `README.md` 文件。主要改动包括：将所有“PHBinder”统一改为“PHbinder”，并在“目录”和“项目结构”之间插入了“Overview”部分以及一个模型图片占位符。
-
 ```markdown
 # PHbinder & PSGM: Peptide-HLA Interaction Framework
 
