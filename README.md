@@ -1,4 +1,4 @@
-# PHbinder & PSGM: Peptide-HLA Interaction Framework
+# PHbinder and PSGM: A Cascaded Framework for Epitope Prediction and HLA-I Allele Identification
 
 这是一个用于肽段-HLA结合预测 (PHbinder) 和 HLA 伪序列生成 (PSGM) 的级联框架。PHbinder 模型旨在预测肽段与其结合的 MHC 分子（HLA）之间的结合亲和力，而 PSGM 模型则能根据给定的肽段生成候选的 HLA 伪序列。
 
@@ -6,7 +6,7 @@
 
 - [PHbinder & PSGM: Peptide-HLA Interaction Framework](#phbinder--psgm-peptide-hla-interaction-framework)
   - [目录](#目录)
-  - [Overview](#overview)
+  - [Overview](#Overview)
   - [项目结构](#项目结构)
   - [开始复现](#开始复现)
     - [1. 克隆仓库](#1-克隆仓库)
@@ -31,20 +31,19 @@
 
 ## Overview
 
-本项目提供了一个端到端的框架，用于处理肽段-HLA结合预测问题。该框架包含两个核心组件：
-
-1.  **PSGM (Pseudo-Sequence Generation Model):** 一个用于根据给定的肽段生成其潜在结合的HLA伪序列的模型。这有助于拓展和丰富HLA结合的上下文信息。
-2.  **PHbinder (Peptide-HLA Binding predictor):** 一个利用LoRA微调的ESM-2模型作为特征提取器，并结合交叉注意力机制和分类器，预测肽段-HLA结合亲和力的模型。
-
 ```
 
-![Model Architecture Diagram](1.png)
+![image](1.png)
+
+---
+
+```
 
 ---
 
 ## 项目结构
 
-````
+```
 
 YourProjectName/
 ├── README.md                           # 本文件
@@ -95,12 +94,10 @@ YourProjectName/
 │   └── run\_cascading\_framework.py      # 级联框架的入口脚本，整合两个模型的工作流
 ├── notebooks/                          # 可选：Jupyter Notebooks，用于实验、数据探索或教程
 │   └── demo\_cascading\_framework.ipynb
-├── docs/                               # 可选：更详细的文档、设计思路、API说明等
-│   └── architecture.md
-└── results/                            # 存放预测结果或生成文件
+└── docs/                               # 可选：更详细的文档、设计思路、API说明等
+└── architecture.md
 
----
-
+````
 
 ## 开始复现
 
@@ -136,25 +133,7 @@ cd YourProjectName
 
 2. **安装依赖：**
    在项目根目录下确保存在 `requirements.txt` 文件，其中列出了所有必要的 Python 库及其版本号。
-
-   **`requirements.txt` 示例内容:**
-
-   ```
-   torch>=1.10.0,<2.3.0
-   transformers>=4.10.0
-   pandas>=1.3.0
-   numpy>=1.21.0
-   scikit-learn>=1.0.0
-   biopython>=1.79
-   tqdm>=4.62.0
-   einops>=0.3.0
-   esm # 特定版本可能需要根据你的ESM模型和库兼容性来确定，例如 esm==0.4.0
-   ```
-
-   **注意：** 这里的版本号是示例，请根据你实际开发时使用的版本进行调整，确保兼容性。特别是 `torch` 和 `esm`，它们的版本匹配非常重要。
-
    然后安装：
-
    ```bash
    pip install -r requirements.txt
    ```
@@ -167,7 +146,6 @@ PHbinder 和 PSGM 模型都依赖于 ESM-2 预训练模型。由于 ESM-2 模型
    访问 ESM 官方 GitHub 页面或 Hugging Face 页面，下载 `esm2_t30_150M_UR50D` 模型权重。通常你会得到一个包含模型文件和 tokenizer 配置的文件夹。
 
    * **Hugging Face:** 可以从 `facebook/esm2_t30_150M_UR50D` 下载，例如通过 `transformers.AutoTokenizer.from_pretrained` 或 `esm.pretrained.esm2_t30_150M_UR50D()` 第一次运行时会自动下载。为了离线运行和避免重复下载，建议手动下载。
-   * 如果你希望手动下载，ESM 模型的 `transformers` 兼容版本通常包含以下文件：`config.json`, `pytorch_model.bin`, `tokenizer.json`, `vocab.json` 等。
 
 2. **放置模型文件:**
    将下载好的 `esm2_t30_150M_UR50D` 文件夹完整地放置到 `models/` 目录下，使其路径为：
@@ -397,45 +375,9 @@ python scripts/train_psgm.py
 
    **注意：** 你需要根据 `run_cascading_framework.py` 的具体实现和参数定义来调整上述命令。它需要同时加载 PSGM 和 PHbinder 模型。
 
-## 清理 (可选)
-
-如果你需要清理生成的数据和模型检查点，可以运行以下命令：
-
-```bash
-rm -rf data/processed/*
-rm -rf models/phbinder_checkpoints/*
-rm -rf models/psgm_checkpoints/*
-rm -rf models/phbinder_lora_weights/*
-rm -rf results/*
-```
-
-## 常见问题与故障排除
-
-* **GPU 内存不足 (CUDA out of memory):**
-
-  * 尝试减小 `config` 文件中 `BATCH_SIZE` 相关参数的值。
-  * 将 `--device` 参数设置为 `cpu`，但这会显著增加运行时间。
-  * 关闭其他占用 GPU 资源的应用程序。
-* **ESM 模型加载错误 (FileNotFoundError 或其他):**
-
-  * 确保你已按照 [下载预训练模型权重 (ESM-2)](#3-下载预训练模型权重-esm-2) 部分的说明，将 ESM 模型文件正确放置在 `models/esm2_t30_150M_UR50D/` 目录下。
-  * 检查 `config/phbinder_config.py` 和 `config/psgm_config.py` 中的 `LOCAL_ESM_MODEL_PATH` 是否正确。
-* **Python 包版本冲突:**
-
-  * 确保你的 `requirements.txt` 文件内容准确无误。
-  * 尝试删除并重新创建 Conda 虚拟环境，然后重新安装依赖。
-* **数据文件格式错误:**
-
-  * 确保你的 CSV 文件严格遵循预期格式（例如，`Epitope` 和 `Label` 列名是否正确，分隔符是否是逗号 `,`）。
-  * 检查文件编码是否正确（通常是 UTF-8）。
-
 ## 许可证
 
 本项目采用 [MIT License](LICENSE) 许可。
 
-## 致谢
 
-感谢所有为本项目提供灵感、数据和支持的资源和个人。
 
-```
-```
