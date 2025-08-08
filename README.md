@@ -424,45 +424,11 @@ python scripts/generate_hla.py \
 
    **注意：** 你需要根据 `run_cascading_framework.py` 的具体实现和参数定义来调整上述命令。它需要同时加载 PSGM 和 PHbinder 模型。
 
-## 清理 (可选)
-
-如果你需要清理生成的数据和模型检查点，可以运行以下命令：
-
-```bash
-rm -rf data/processed/*
-rm -rf models/phbinder_checkpoints/*
-rm -rf models/psgm_checkpoints/*
-rm -rf models/phbinder_lora_weights/*
-rm -rf results/*
 ```
-
-## 常见问题与故障排除
-
-* **GPU 内存不足 (CUDA out of memory):**
-
-  * 尝试减小 `config` 文件中 `BATCH_SIZE` 相关参数的值。
-  * 将 `--device` 参数设置为 `cpu`，但这会显著增加运行时间。
-  * 关闭其他占用 GPU 资源的应用程序。
-* **ESM 模型加载错误 (FileNotFoundError 或其他):**
-
-  * 确保你已按照 [下载预训练模型权重 (ESM-2)](#3-下载预训练模型权重-esm-2) 部分的说明，将 ESM 模型文件正确放置在 `models/esm2_t30_150M_UR50D/` 目录下。
-  * 检查 `config/phbinder_config.py` 和 `config/psgm_config.py` 中的 `LOCAL_ESM_MODEL_PATH` 是否正确。
-* **Python 包版本冲突:**
-
-  * 确保你的 `requirements.txt` 文件内容准确无误。
-  * 尝试删除并重新创建 Conda 虚拟环境，然后重新安装依赖。
-* **数据文件格式错误:**
-
-  * 确保你的 CSV 文件严格遵循预期格式（例如，`Epitope` 和 `Label` 列名是否正确，分隔符是否是逗号 `,`）。
-  * 检查文件编码是否正确（通常是 UTF-8）。
 
 ## 许可证
 
 本项目采用 [MIT License](LICENSE) 许可。
-
-## 致谢
-
-感谢所有为本项目提供灵感、数据和支持的资源和个人。
 
 ```
 ```
