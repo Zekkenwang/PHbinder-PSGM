@@ -31,14 +31,13 @@
 
 ## Overview
 
-```
 本项目提供了一个端到端的框架，用于处理肽段-HLA结合预测问题。该框架包含两个核心组件：
 
 1.  **PSGM (Pseudo-Sequence Generation Model):** 一个用于根据给定的肽段生成其潜在结合的HLA伪序列的模型。这有助于拓展和丰富HLA结合的上下文信息。
 2.  **PHbinder (Peptide-HLA Binding predictor):** 一个利用LoRA微调的ESM-2模型作为特征提取器，并结合交叉注意力机制和分类器，预测肽段-HLA结合亲和力的模型。
 
 这两个模型可以独立使用，也可以通过级联的方式实现更全面的分析流程。以下是PHbinder和PSGM模型及其级联工作流的简要示意图：
-```
+
 ![image](1.png)
 
 ---
