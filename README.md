@@ -1,11 +1,12 @@
-# PHBinder & PSGM: Peptide-HLA Interaction Framework
+# PHbinder and PSGM: A Cascaded Framework for Epitope Prediction and HLA-I Allele Identification
 
-这是一个用于肽段-HLA结合预测 (PHBinder) 和 HLA 伪序列生成 (PSGM) 的级联框架。PHBinder 模型旨在预测肽段与其结合的 MHC 分子（HLA）之间的结合亲和力，而 PSGM 模型则能根据给定的肽段生成候选的 HLA 伪序列。
+这是一个用于肽段-HLA结合预测 (PHbinder) 和 HLA 伪序列生成 (PSGM) 的级联框架。PHbinder 模型旨在预测肽段与其结合的 MHC 分子（HLA）之间的结合亲和力，而 PSGM 模型则能根据给定的肽段生成候选的 HLA 伪序列。
 
 ## 目录
 
-- [PHBinder & PSGM: Peptide-HLA Interaction Framework](#phbinder--psgm-peptide-hla-interaction-framework)
+- [PHbinder & PSGM: Peptide-HLA Interaction Framework](#phbinder--psgm-peptide-hla-interaction-framework)
   - [目录](#目录)
+  - [Overview](#Overview)
   - [项目结构](#项目结构)
   - [开始复现](#开始复现)
     - [1. 克隆仓库](#1-克隆仓库)
@@ -17,14 +18,25 @@
     - [1. PSGM 模型训练与生成 (HLA 伪序列生成器)](#1-psgm-模型训练与生成-hla-伪序列生成器)
       - [训练 PSGM 模型](#训练-psgm-模型)
       - [生成 HLA 伪序列](#生成-hla-伪序列)
-    - [2. PHBinder 模型使用场景](#2-phbinder-模型使用场景)
-      - [场景 1: 在自己的数据集上全新训练并测试 PHBinder](#场景-1-在自己的数据集上全新训练并测试-phbinder)
+    - [2. PHbinder 模型使用场景](#2-phbinder-模型使用场景)
+      - [场景 1: 在自己的数据集上全新训练并测试 PHbinder](#场景-1-在自己的数据集上全新训练并测试-phbinder)
       - [场景 2: 利用已保存的模型参数进行预测/测试](#场景-2-利用已保存的模型参数进行预测测试)
     - [3. 运行级联框架 (端到端工作流)](#3-运行级联框架-端到端工作流)
   - [清理 (可选)](#清理-可选)
   - [常见问题与故障排除](#常见问题与故障排除)
   - [许可证](#许可证)
   - [致谢](#致谢)
+
+---
+
+## Overview
+
+```
+
+![image](1.pdf)
+
+
+```
 
 ---
 
@@ -42,9 +54,9 @@ YourProjectName/
 │   └── psgm\_config.py                  # PSGM模型训练和推理的配置参数
 ├── data/
 │   ├── raw/                            # 原始数据文件
-│   │   ├── HLA\_I\_epitope\_train\_shuffle.csv  # PHBinder 训练集
-│   │   ├── HLA\_I\_epitope\_validation.csv     # PHBinder 验证集
-│   │   ├── HLA\_I\_epitope\_test.csv           # PHBinder 测试集
+│   │   ├── HLA\_I\_epitope\_train\_shuffle.csv  # PHbinder 训练集
+│   │   ├── HLA\_I\_epitope\_validation.csv     # PHbinder 验证集
+│   │   ├── HLA\_I\_epitope\_test.csv           # PHbinder 测试集
 │   │   ├── hebing.CSV                       # PSGM 训练数据
 │   │   └── 伪序列数据.CSV                   # HLA伪序列数据库
 │   └── processed/                      # 预处理或中间生成的数据 (由脚本生成)
@@ -74,7 +86,7 @@ YourProjectName/
 │   └── common/                         # 两个模型可能共享的通用工具函数或基类 (如果未来有的话)
 ├── scripts/                            # 运行模型和框架的脚本
 │   ├── train\_phbinder.py               # (旧版本，可用于断点续训，但本README主要使用 train\_and\_evaluate\_phbinder.py 进行全新训练)
-│   ├── train\_and\_evaluate\_phbinder.py  # 用于PHBinder的全新训练和评估 (推荐)
+│   ├── train\_and\_evaluate\_phbinder.py  # 用于PHbinder的全新训练和评估 (推荐)
 │   ├── train\_psgm.py                   # 训练PSGM模型的入口脚本
 │   ├── generate\_hla.py                 # 使用PSGM模型生成HLA伪序列的脚本
 │   ├── predict\_binding.py              # 使用PHbinder模型进行结合预测的脚本
@@ -127,7 +139,7 @@ cd YourProjectName
 
 ### 3. 下载预训练模型权重 (ESM-2)
 
-PHBinder 和 PSGM 模型都依赖于 ESM-2 预训练模型。由于 ESM-2 模型文件较大，不适合直接上传到 Git 仓库，你需要自行下载并放置到指定目录。
+PHbinder 和 PSGM 模型都依赖于 ESM-2 预训练模型。由于 ESM-2 模型文件较大，不适合直接上传到 Git 仓库，你需要自行下载并放置到指定目录。
 
 1. **下载 ESM-2 模型:**
    访问 ESM 官方 GitHub 页面或 Hugging Face 页面，下载 `esm2_t30_150M_UR50D` 模型权重。通常你会得到一个包含模型文件和 tokenizer 配置的文件夹。
@@ -187,9 +199,9 @@ class Config:
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu" # 根据你的硬件选择 'cuda' 或 'cpu'
     LOCAL_ESM_MODEL_PATH = "models/esm2_t30_150M_UR50D" # 确保指向你下载的ESM模型路径
     # 以下路径在新的 train_and_evaluate_phbinder.py 中可以通过命令行参数覆盖
-    TRAIN_DATA_PATH = "data/raw/HLA_I_epitope_train_shuffle.csv" # PHBinder训练数据路径
-    VALIDATION_DATA_PATH = "data/raw/HLA_I_epitope_validation.csv" # PHBinder验证数据路径
-    TEST_DATA_PATH = "data/raw/HLA_I_epitope_test.csv" # PHBinder测试数据路径
+    TRAIN_DATA_PATH = "data/raw/HLA_I_epitope_train_shuffle.csv" # PHbinder训练数据路径
+    VALIDATION_DATA_PATH = "data/raw/HLA_I_epitope_validation.csv" # PHbinder验证数据路径
+    TEST_DATA_PATH = "data/raw/HLA_I_epitope_test.csv" # PHbinder测试数据路径
     SAVE_PATH_MAIN_MODEL_CHECKPOINTS = "models/phbinder_checkpoints/" # 主模型检查点保存目录
     SAVE_PATH_LORA_WEIGHTS = "models/phbinder_lora_weights/best_lora_I.pt" # LoRA权重保存路径
     EPITOPE_MAX_LEN = 128 # 肽段编码的最大长度，请根据你的数据调整
@@ -241,13 +253,13 @@ python scripts/train_psgm.py
    * `--hla_db_path`: **必需**，HLA 伪序列数据库路径。
    * `--device`: 指定运行设备。
 
-### 2. PHBinder 模型使用场景
+### 2. PHbinder 模型使用场景
 
-本节详细介绍了 PHBinder 模型的两种主要使用方式。
+本节详细介绍了 PHbinder 模型的两种主要使用方式。
 
-#### 场景 1: 在自己的数据集上全新训练并测试 PHBinder
+#### 场景 1: 在自己的数据集上全新训练并测试 PHbinder
 
-此模式将从头开始对 PHBinder 模型进行 LoRA 微调，然后训练主模型，并在你指定的数据集上进行测试。
+此模式将从头开始对 PHbinder 模型进行 LoRA 微调，然后训练主模型，并在你指定的数据集上进行测试。
 
 1. **准备数据:**
    确保你的训练集、验证集和测试集 CSV 文件（例如 `my_train.csv`, `my_val.csv`, `my_test.csv`）已准备好，并且每个文件都包含 `Epitope` 和 `Label` 列。
@@ -277,12 +289,12 @@ python scripts/train_psgm.py
 4. **预期输出:**
 
    * LoRA 微调的权重将保存到 `--lora_save_path` 指定的位置。
-   * PHBinder 主模型的最佳检查点将保存到 `--main_model_save_dir` 目录下（文件名为 `best_model_I.pt`）。
+   * PHbinder 主模型的最佳检查点将保存到 `--main_model_save_dir` 目录下（文件名为 `best_model_I.pt`）。
    * 脚本运行结束后，将在控制台输出在测试集上的最终评估指标 (Accuracy, F1 Score, Recall, Precision, MCC, AUC)。
 
 #### 场景 2: 利用已保存的模型参数进行预测/测试
 
-此模式允许你直接加载一个已经训练好的 PHBinder 模型 (`best_model_I.pt`)，并在你自己的数据集上进行预测或测试。
+此模式允许你直接加载一个已经训练好的 PHbinder 模型 (`best_model_I.pt`)，并在你自己的数据集上进行预测或测试。
 
 **此场景使用 `scripts/predict_binding.py` 脚本。**
 
@@ -308,7 +320,7 @@ python scripts/train_psgm.py
    ```
 
 2. **确认模型路径:**
-   确保你已经下载或训练好了 PHBinder 主模型检查点 (例如 `models/phbinder_checkpoints/best_model_I.pt`) 和其对应的 LoRA 权重 (例如 `models/phbinder_lora_weights/best_lora_I.pt`)。这些路径应该与 `config/phbinder_config.py` 中的默认值一致，或者你可以在命令行中指定。
+   确保你已经下载或训练好了 PHbinder 主模型检查点 (例如 `models/phbinder_checkpoints/best_model_I.pt`) 和其对应的 LoRA 权重 (例如 `models/phbinder_lora_weights/best_lora_I.pt`)。这些路径应该与 `config/phbinder_config.py` 中的默认值一致，或者你可以在命令行中指定。
 
 3. **运行预测脚本:**
    在项目根目录下，执行以下命令：
@@ -324,8 +336,8 @@ python scripts/train_psgm.py
 
    * `--input_data_file`: **必需**，指定你的输入数据文件。
    * `--output_predictions_file`: **必需**，指定预测结果的输出路径和文件名。
-   * `--main_model_path`: **可选**，PHBinder 主模型的路径。默认值为 `config.SAVE_PATH_MAIN_MODEL_CHECKPOINTS/best_model_I.pt`。
-   * `--lora_weights_path`: **可选**，PHBinder LoRA 微调的权重路径 (初始化 `This_work` 模型所需)。默认值为 `config.SAVE_PATH_LORA_WEIGHTS`。
+   * `--main_model_path`: **可选**，PHbinder 主模型的路径。默认值为 `config.SAVE_PATH_MAIN_MODEL_CHECKPOINTS/best_model_I.pt`。
+   * `--lora_weights_path`: **可选**，PHbinder LoRA 微调的权重路径 (初始化 `This_work` 模型所需)。默认值为 `config.SAVE_PATH_LORA_WEIGHTS`。
    * `--device`: 指定运行设备。
 
 4. **预期输出:**
@@ -335,7 +347,7 @@ python scripts/train_psgm.py
 
 ### 3. 运行级联框架 (端到端工作流)
 
-`run_cascading_framework.py` 脚本将整合 PSGM 和 PHBinder，实现从肽段到生成 HLA 伪序列再到结合预测的完整工作流。在运行此脚本之前，请确保你已经训练并保存了 PSGM 模型和 PHBinder 模型。
+`run_cascading_framework.py` 脚本将整合 PSGM 和 PHbinder，实现从肽段到生成 HLA 伪序列再到结合预测的完整工作流。在运行此脚本之前，请确保你已经训练并保存了 PSGM 模型和 PHbinder 模型。
 
 1. **准备输入文件：**
    通常，这个脚本的输入将是一个只包含肽段的 CSV 文件，与 `generate_hla.py` 的输入类似。
@@ -360,15 +372,11 @@ python scripts/train_psgm.py
        --device "cuda" # 或 "cpu"
    ```
 
-   **注意：** 你需要根据 `run_cascading_framework.py` 的具体实现和参数定义来调整上述命令。它需要同时加载 PSGM 和 PHBinder 模型。
+   **注意：** 你需要根据 `run_cascading_framework.py` 的具体实现和参数定义来调整上述命令。它需要同时加载 PSGM 和 PHbinder 模型。
 
 ## 许可证
 
 本项目采用 [MIT License](LICENSE) 许可。
 
-## 致谢
 
-感谢所有为本项目提供灵感、数据和支持的资源和个人。
 
-```
-```
