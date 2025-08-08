@@ -1,4 +1,3 @@
-```markdown
 # PHbinder & PSGM: Peptide-HLA Interaction Framework
 
 这是一个用于肽段-HLA结合预测 (PHbinder) 和 HLA 伪序列生成 (PSGM) 的级联框架。PHbinder 模型旨在预测肽段与其结合的 MHC 分子（HLA）之间的结合亲和力，而 PSGM 模型则能根据给定的肽段生成候选的 HLA 伪序列。
