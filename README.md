@@ -2,6 +2,8 @@
 
 # PHbinder & PSGM: A Peptide-HLA Interaction Framework
 
+![PHbinder & PSGM Framework](1.png)
+
 This is a cascaded framework for peptide-HLA binding prediction (PHBinder) and HLA pseudo-sequence generation (PSGM). The PHbinder model is designed to predict the binding affinity between peptides and their corresponding MHC molecules (HLA). The PSGM model generates candidate HLA-I pseudo-sequences based on a given peptide and maps them to a corresponding list of HLA-I alleles.
 
 ### Model Replication
