@@ -1,10 +1,11 @@
----
-
 # PHbinder & PSGM: A Peptide-HLA Interaction Framework
+
+### Overview
+
+This is a cascaded framework for peptide-HLA binding prediction (PHBinder) and HLA pseudo-sequence generation (PSGM). The PHbinder model is designed to predict the binding affinity between peptides and their corresponding MHC molecules (HLA). The PSGM model generates candidate HLA-I pseudo-sequences based on a given peptide and maps them to a corresponding list of HLA-I alleles.
 
 ![PHbinder & PSGM Framework](1.png)
 
-This is a cascaded framework for peptide-HLA binding prediction (PHBinder) and HLA pseudo-sequence generation (PSGM). The PHbinder model is designed to predict the binding affinity between peptides and their corresponding MHC molecules (HLA). The PSGM model generates candidate HLA-I pseudo-sequences based on a given peptide and maps them to a corresponding list of HLA-I alleles.
 
 ### Model Replication
 
@@ -13,7 +14,7 @@ First, clone this repository to your local machine:
 ```bash
 git clone https://github.com/Zekkenwang/PHbinder-PSGM.git
 cd PHbinder-PSGM
-```
+````
 
 ### Setting Up the Python Environment
 
@@ -33,6 +34,26 @@ It is highly recommended to use Conda or `venv` to create an isolated Python vir
    ```
 
 ## Model Training and Usage
+
+### Downloading Pre-trained Models
+
+To skip the training process and use our pre-trained models directly for prediction, please download the model weights from our Hugging Face Hub repository:
+
+[https://huggingface.co/Zekkenwang/PHbinder-PSGM](https://huggingface.co/Zekkenwang/PHbinder-PSGM)
+
+After downloading, please organize the files into the `models/` directory of your cloned repository, following this structure:
+
+```
+PHbinder-PSGM/
+└── models/
+    ├── esm2_t30_150_UR50D/
+    ├── phbinder/
+    ├── psgm/
+    └── phbinder_pretrain/
+
+```
+
+**Note:** If the `models` directory or its subdirectories (`phbinder`, `psgm`, `phbinder_pretrain`) do not exist, please create them manually before placing the downloaded files.
 
 ### PHbinder: Training and Usage
 
@@ -54,7 +75,9 @@ python scripts/phbinder.py
 
 #### Predicting Epitopes with the PHbinder Model
 
-To predict whether a peptide is an epitope using the trained model, run:
+To predict whether a peptide is an epitope using the pre-trained model, you must first [download the model weights](#downloading-pre-trained-models) and place them in the specified `models/phbinder/` and `models/phbinder_pretrain/` directories.
+
+Then, run:
 
 ```bash
 python scripts/predict_phbinder.py
@@ -78,7 +101,7 @@ python scripts/train_psgm.py
 
 #### Generating HLA-I Pseudo-Sequences with the PSGM Model
 
-Use the trained PSGM model to generate HLA-I pseudo-sequences from a given list of peptides and map them to a corresponding list of HLA Alleles.
+Use the pre-trained PSGM model to generate HLA-I pseudo-sequences from a given list of peptides and map them to a corresponding list of HLA Alleles. You must first [download the model weights](#downloading-pre-trained-models) and place them in the specified `models/psgm/` directory.
 
 Run the following script for generation:
 
@@ -87,3 +110,4 @@ python scripts/predict_psgm.py
 ```
 
 This will generate predictions on an external dataset, with an example provided in `external_data`. To evaluate on your own data, modify the `EXTERNAL_DATA_PATH` and `PREDICTION_OUTPUT_PATH` in the `psgm_config` file to your specific input and output file paths.
+
